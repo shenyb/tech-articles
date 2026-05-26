@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>话务服务系统架构图</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      margin-bottom: 2rem;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      margin-left: 1.75rem;
+    }
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    svg {
+      width: 100%;
+      min-width: 1000px;
+      display: block;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 0.75rem;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.orange { background: #fb923c; }
+    .card-dot.violet { background: #a78bfa; }
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .card ul {
+      list-style: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+    .card li {
+      margin-bottom: 0.375rem;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #475569;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>话务服务系统架构</h1>
+      </div>
+      <p class="subtitle">呼叫中心自研 · 事件驱动 · FreeSWITCH ESL → 话务数据 → 下游业务</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1100 680">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <marker id="arrowhead-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+          </marker>
+          <marker id="arrowhead-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
+          </marker>
+          <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb923c" />
+          </marker>
+          <marker id="arrowhead-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa" />
+          </marker>
+          <marker id="arrowhead-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb7185" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- ============ SYSTEM BOUNDARY ============ -->
+        <rect x="250" y="40" width="830" height="600" rx="12" fill="rgba(6, 78, 59, 0.06)" stroke="#34d399" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="262" y="58" fill="#34d399" font-size="10" font-weight="600">话务服务系统</text>
+
+        <!-- ============ LAYER 1 ============ -->
+        <rect x="30" y="80" width="170" height="80" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="115" y="105" fill="white" font-size="12" font-weight="600" text-anchor="middle">FreeSWITCH</text>
+        <text x="115" y="121" fill="#94a3b8" font-size="9" text-anchor="middle">软交换 / ESL事件源</text>
+        <text x="115" y="137" fill="#94a3b8" font-size="8" text-anchor="middle">振铃/接听/挂断/销毁</text>
+
+        <line x1="200" y1="120" x2="268" y2="120" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+        <text x="234" y="114" fill="#94a3b8" font-size="9" text-anchor="middle">ESL Events</text>
+
+        <!-- ============ LAYER 2 ============ -->
+        <rect x="270" y="90" width="170" height="60" rx="6" fill="rgba(251, 146, 60, 0.25)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="355" y="115" fill="white" font-size="11" font-weight="600" text-anchor="middle">消息总线</text>
+        <text x="355" y="131" fill="#94a3b8" font-size="9" text-anchor="middle">接收ESL事件</text>
+
+        <line x1="440" y1="120" x2="508" y2="120" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+        <text x="474" y="114" fill="#94a3b8" font-size="9" text-anchor="middle">事件投递</text>
+
+        <!-- ============ LAYER 3 ============ -->
+        <rect x="510" y="80" width="210" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="615" y="100" fill="white" font-size="11" font-weight="600" text-anchor="middle">EventDispatcher</text>
+        <text x="615" y="116" fill="#94a3b8" font-size="9" text-anchor="middle">事件分发 · 分布式锁</text>
+        <text x="615" y="132" fill="#34d399" font-size="8" text-anchor="middle">16+ 事件类型路由</text>
+        <text x="615" y="148" fill="#fb7185" font-size="8" text-anchor="middle">分布式锁 防并发</text>
+
+        <rect x="510" y="190" width="210" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="615" y="210" fill="white" font-size="11" font-weight="600" text-anchor="middle">EventProcessor</text>
+        <text x="615" y="226" fill="#94a3b8" font-size="9" text-anchor="middle">事件处理核心逻辑</text>
+        <text x="615" y="242" fill="#94a3b8" font-size="8" text-anchor="middle">CREATE → ANSWER → BRIDGE → HANGUP → DESTROY</text>
+        <text x="615" y="258" fill="#fb7185" font-size="8" text-anchor="middle">场景: 呼入/呼出/咨询/转接/多线路</text>
+
+        <line x1="615" y1="160" x2="615" y2="188" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+        <text x="628" y="177" fill="#94a3b8" font-size="8">按类型分发</text>
+
+        <!-- ============ LAYER 4 ============ -->
+        <rect x="800" y="80" width="230" height="130" rx="8" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="915" y="100" fill="white" font-size="11" font-weight="600" text-anchor="middle">MySQL 话务数据</text>
+        <text x="915" y="118" fill="#a78bfa" font-size="9" text-anchor="middle">按 callId 分表</text>
+        <text x="915" y="138" fill="#94a3b8" font-size="8" text-anchor="middle">t_call_main（话务主表）</text>
+        <text x="915" y="152" fill="#94a3b8" font-size="8" text-anchor="middle">t_call_timing（时间状态）</text>
+        <text x="915" y="166" fill="#94a3b8" font-size="8" text-anchor="middle">t_call_ext（扩展信息）</text>
+        <text x="915" y="180" fill="#94a3b8" font-size="8" text-anchor="middle">MyBatis-Plus 路由</text>
+
+        <line x1="720" y1="210" x2="798" y2="140" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowhead-violet)"/>
+        <text x="748" y="155" fill="#94a3b8" font-size="8">写入</text>
+
+        <rect x="800" y="240" width="230" height="80" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="915" y="262" fill="white" font-size="11" font-weight="600" text-anchor="middle">Redis</text>
+        <text x="915" y="278" fill="#94a3b8" font-size="9" text-anchor="middle">callId索引 · 监控计数</text>
+        <text x="915" y="294" fill="#94a3b8" font-size="8" text-anchor="middle">分布式锁 · 消息路由标记</text>
+
+        <line x1="720" y1="240" x2="798" y2="280" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead-orange)"/>
+        <text x="748" y="275" fill="#94a3b8" font-size="8">缓存/计数</text>
+
+        <!-- ============ LAYER 5 ============ -->
+        <rect x="510" y="310" width="210" height="70" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="615" y="332" fill="white" font-size="11" font-weight="600" text-anchor="middle">MessageAssembler</text>
+        <text x="615" y="348" fill="#94a3b8" font-size="9" text-anchor="middle">消息组装 · 投递</text>
+        <text x="615" y="364" fill="#94a3b8" font-size="8" text-anchor="middle">普通通话 / 双呼 / 转接场景</text>
+
+        <line x1="615" y1="270" x2="615" y2="308" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+        <text x="600" y="293" fill="#94a3b8" font-size="8">数据就绪→发送</text>
+
+        <rect x="270" y="310" width="170" height="60" rx="6" fill="rgba(251, 146, 60, 0.25)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="355" y="335" fill="white" font-size="11" font-weight="600" text-anchor="middle">消息总线</text>
+        <text x="355" y="351" fill="#94a3b8" font-size="9" text-anchor="middle">推送下游业务</text>
+
+        <line x1="508" y1="345" x2="442" y2="345" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead-orange)"/>
+
+        <!-- ============ LAYER 6 ============ -->
+        <rect x="30" y="300" width="200" height="80" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="130" y="322" fill="white" font-size="11" font-weight="600" text-anchor="middle">下游业务系统</text>
+        <text x="130" y="340" fill="#94a3b8" font-size="9" text-anchor="middle">客服系统 · 销售系统</text>
+        <text x="130" y="356" fill="#94a3b8" font-size="8" text-anchor="middle">话务展示 · 计费 · 报表</text>
+
+        <line x1="230" y1="340" x2="268" y2="340" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- ============ INFRA ============ -->
+        <rect x="800" y="350" width="100" height="50" rx="6" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="850" y="372" fill="white" font-size="10" font-weight="600" text-anchor="middle">分布式锁</text>
+        <text x="850" y="387" fill="#94a3b8" font-size="8" text-anchor="middle">锁服务</text>
+
+        <line x1="800" y1="375" x2="722" y2="245" stroke="#fb7185" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowhead-rose)"/>
+
+        <rect x="930" y="350" width="100" height="50" rx="6" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="980" y="372" fill="white" font-size="10" font-weight="600" text-anchor="middle">配置中心</text>
+        <text x="980" y="387" fill="#94a3b8" font-size="8" text-anchor="middle">远程配置</text>
+
+        <line x1="930" y1="360" x2="722" y2="240" stroke="#fb7185" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowhead-rose)"/>
+
+        <rect x="800" y="430" width="100" height="50" rx="6" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="850" y="452" fill="white" font-size="10" font-weight="600" text-anchor="middle">监控系统</text>
+        <text x="850" y="467" fill="#94a3b8" font-size="8" text-anchor="middle">实时打点</text>
+
+        <line x1="850" y1="430" x2="722" y2="240" stroke="#fb7185" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowhead-rose)"/>
+
+        <!-- ============ OPS ============ -->
+        <rect x="510" y="420" width="210" height="100" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="615" y="440" fill="white" font-size="11" font-weight="600" text-anchor="middle">运维管理</text>
+        <text x="615" y="458" fill="#94a3b8" font-size="9" text-anchor="middle">REST API</text>
+        <text x="615" y="476" fill="#94a3b8" font-size="8" text-anchor="middle">重新推送 / 重新转码</text>
+        <text x="615" y="492" fill="#94a3b8" font-size="8" text-anchor="middle">定时任务：数据告警·转码超时</text>
+        <text x="615" y="508" fill="#22d3ee" font-size="7" text-anchor="middle">手工修复 · 压测 · 查询</text>
+
+        <line x1="615" y1="380" x2="615" y2="418" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead-cyan)"/>
+
+        <!-- ============ LEGEND ============ -->
+        <text x="40" y="460" fill="white" font-size="10" font-weight="600">图例</text>
+
+        <rect x="40" y="472" width="14" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="58" y="480" fill="#94a3b8" font-size="8">外部系统</text>
+
+        <rect x="40" y="490" width="14" height="10" rx="2" fill="rgba(251, 146, 60, 0.25)" stroke="#fb923c" stroke-width="1"/>
+        <text x="58" y="498" fill="#94a3b8" font-size="8">消息总线</text>
+
+        <rect x="40" y="508" width="14" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="58" y="516" fill="#94a3b8" font-size="8">核心服务</text>
+
+        <rect x="40" y="526" width="14" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="58" y="534" fill="#94a3b8" font-size="8">数据库</text>
+
+        <rect x="40" y="544" width="14" height="10" rx="2" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1"/>
+        <text x="58" y="552" fill="#94a3b8" font-size="8">缓存</text>
+
+        <rect x="40" y="562" width="14" height="10" rx="2" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="58" y="570" fill="#94a3b8" font-size="8">基础设施</text>
+
+        <rect x="40" y="580" width="14" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="58" y="588" fill="#94a3b8" font-size="8">运维管理</text>
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot cyan"></div>
+          <h3>核心能力</h3>
+        </div>
+        <ul>
+          <li>• 16+ ESL事件类型全覆盖</li>
+          <li>• 呼入/呼出/咨询/转接/多线路</li>
+          <li>• 监听/直接接管</li>
+          <li>• 双呼/外线/热线场景</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot orange"></div>
+          <h3>关键设计</h3>
+        </div>
+        <ul>
+          <li>• 分布式锁防并发</li>
+          <li>• 按callId分表 + MyBatis-Plus</li>
+          <li>• 事件乱序兼容 + 自定义兜底事件</li>
+          <li>• 挂机原因多维度综合判定</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>运维能力</h3>
+        </div>
+        <ul>
+          <li>• 多层监控告警</li>
+          <li>• 手工补推话务接口</li>
+          <li>• 批量重推 + 重新转码</li>
+          <li>• 内置压测工具</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      呼叫中心话务服务 · 事件驱动架构
+    </p>
+  </div>
+</body>
+</html>
