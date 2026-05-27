@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据聚合层（Layer）架构图</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #020617; font-family: 'JetBrains Mono', monospace; color: #e2e8f0; display: flex; justify-content: center; padding: 40px 20px; }
+.container { max-width: 1100px; width: 100%; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+.pulse-dot { width: 10px; height: 10px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.header h1 { font-size: 22px; font-weight: 600; color: #f1f5f9; }
+.header .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
+.diagram-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 30px; margin-bottom: 24px; }
+svg { width: 100%; height: auto; display: block; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 18px; }
+.card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.card-dot.cyan { background: #22d3ee; }
+.card-dot.emerald { background: #34d399; }
+.card-dot.amber { background: #fbbf24; }
+.card h3 { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+.card ul { list-style: none; }
+.card li { font-size: 11px; color: #94a3b8; line-height: 1.8; padding-left: 8px; }
+.footer { text-align: center; font-size: 10px; color: #475569; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="pulse-dot"></div>
+  <div>
+    <h1>数据聚合层（Layer）架构</h1>
+    <div class="subtitle">当你的数据散落在三个系统里</div>
+  </div>
+</div>
+
+<div class="diagram-card">
+<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#22d3ee"/>
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#34d399"/>
+    </marker>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1000" height="620" fill="url(#grid)"/>
+
+  <!-- ====== Layer 1: 外部系统（顶部） ====== -->
+  <text x="500" y="40" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">外部系统</text>
+
+  <!-- HR/OA 系统 -->
+  <rect x="60" y="55" width="240" height="60" rx="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="60" y="55" width="240" height="60" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="none"/>
+  <text x="180" y="82" text-anchor="middle" font-size="12" fill="#e2e8f0" font-weight="600">HR/OA 组织用户系统</text>
+  <text x="180" y="98" text-anchor="middle" font-size="8" fill="#94a3b8">人员信息 · 组织架构 · 分机号</text>
+
+  <!-- 云电话系统 -->
+  <rect x="380" y="55" width="240" height="60" rx="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="380" y="55" width="240" height="60" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="none"/>
+  <text x="500" y="82" text-anchor="middle" font-size="12" fill="#e2e8f0" font-weight="600">云电话系统</text>
+  <text x="500" y="98" text-anchor="middle" font-size="8" fill="#94a3b8">办公方式 · 销售侧手机号</text>
+
+  <!-- 直线号码系统 -->
+  <rect x="700" y="55" width="240" height="60" rx="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="700" y="55" width="240" height="60" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="none"/>
+  <text x="820" y="82" text-anchor="middle" font-size="12" fill="#e2e8f0" font-weight="600">直线号码系统</text>
+  <text x="820" y="98" text-anchor="middle" font-size="8" fill="#94a3b8">直线号码 · 线路信息</text>
+
+  <!-- 连接线：外部系统 → Layer 层 -->
+  <line x1="180" y1="115" x2="180" y2="145" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="500" y1="115" x2="500" y2="145" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="820" y1="115" x2="820" y2="145" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ====== Layer 2: Layer 层（中间核心） ====== -->
+  <rect x="30" y="148" width="940" height="100" rx="10" fill="none" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+  <text x="500" y="138" text-anchor="middle" font-size="10" fill="#22d3ee" font-weight="600">数据聚合层（layer/）</text>
+
+  <!-- UserOrgLayerService -->
+  <rect x="60" y="160" width="240" height="70" rx="6" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+  <rect x="60" y="160" width="240" height="70" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="none"/>
+  <text x="180" y="185" text-anchor="middle" font-size="11" fill="#22d3ee" font-weight="600">UserOrgLayerService</text>
+  <text x="180" y="202" text-anchor="middle" font-size="8" fill="#94a3b8">重试 3 次 + WMonitor 监控</text>
+  <text x="180" y="216" text-anchor="middle" font-size="8" fill="#64748b">@SCFClient → IUserService</text>
+
+  <!-- PhoneBarLayerService -->
+  <rect x="380" y="160" width="240" height="70" rx="6" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+  <rect x="380" y="160" width="240" height="70" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="none"/>
+  <text x="500" y="185" text-anchor="middle" font-size="11" fill="#22d3ee" font-weight="600">PhoneBarLayerService</text>
+  <text x="500" y="202" text-anchor="middle" font-size="8" fill="#94a3b8">重试 3 次 + WMonitor 监控</text>
+  <text x="500" y="216" text-anchor="middle" font-size="8" fill="#64748b">@SCFClient → IPhoneBarService</text>
+
+  <!-- DirectLineLayerService -->
+  <rect x="700" y="160" width="240" height="70" rx="6" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+  <rect x="700" y="160" width="240" height="70" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="none"/>
+  <text x="820" y="185" text-anchor="middle" font-size="11" fill="#22d3ee" font-weight="600">DirectLineLayerService</text>
+  <text x="820" y="202" text-anchor="middle" font-size="8" fill="#94a3b8">重试 3 次 + WMonitor 监控</text>
+  <text x="820" y="216" text-anchor="middle" font-size="8" fill="#64748b">@SCFClient → IDirectLineService</text>
+
+  <!-- 连接线：Layer → 业务编排 -->
+  <line x1="180" y1="230" x2="180" y2="270" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="500" y1="230" x2="500" y2="270" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="820" y1="230" x2="820" y2="270" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ====== Layer 3: 业务编排层 ====== -->
+  <rect x="150" y="275" width="700" height="80" rx="10" fill="none" stroke="#34d399" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+  <text x="500" y="265" text-anchor="middle" font-size="10" fill="#34d399" font-weight="600">业务编排层（outter/ Service）</text>
+
+  <rect x="350" y="290" width="300" height="50" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+  <rect x="350" y="290" width="300" height="50" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="none"/>
+  <text x="500" y="312" text-anchor="middle" font-size="11" fill="#34d399" font-weight="600">BusinessGroupService</text>
+  <text x="500" y="328" text-anchor="middle" font-size="8" fill="#94a3b8">组装 UserOrg + PhoneBar + DirectLine 数据</text>
+
+  <!-- 连接线：业务编排 → Controller -->
+  <line x1="500" y1="355" x2="500" y2="385" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ====== Layer 4: Controller / API 层 ====== -->
+  <rect x="120" y="390" width="760" height="85" rx="10" fill="none" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+  <text x="500" y="382" text-anchor="middle" font-size="10" fill="#a78bfa" font-weight="600">API 对外接口</text>
+
+  <rect x="60" y="405" width="200" height="55" rx="6" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5"/>
+  <rect x="60" y="405" width="200" height="55" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="none"/>
+  <text x="160" y="427" text-anchor="middle" font-size="10" fill="#a78bfa">REST Controller</text>
+  <text x="160" y="443" text-anchor="middle" font-size="8" fill="#94a3b8">5 个 Controller</text>
+
+  <rect x="400" y="405" width="200" height="55" rx="6" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5"/>
+  <rect x="400" y="405" width="200" height="55" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="none"/>
+  <text x="500" y="427" text-anchor="middle" font-size="10" fill="#a78bfa">SCF RPC 接口</text>
+  <text x="500" y="443" text-anchor="middle" font-size="8" fill="#94a3b8">ISeatPropertyService 等</text>
+
+  <rect x="740" y="405" width="200" height="55" rx="6" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5"/>
+  <rect x="740" y="405" width="200" height="55" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="none"/>
+  <text x="840" y="427" text-anchor="middle" font-size="10" fill="#a78bfa">运维接口</text>
+  <text x="840" y="443" text-anchor="middle" font-size="8" fill="#94a3b8">ToolController</text>
+
+  <!-- ====== Layer 5: 数据存储 ====== -->
+  <line x1="160" y1="460" x2="160" y2="495" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="500" y1="460" x2="500" y2="495" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="840" y1="460" x2="840" y2="495" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="30" y="500" width="940" height="75" rx="10" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+  <text x="500" y="492" text-anchor="middle" font-size="10" fill="#fbbf24" font-weight="600">数据存储</text>
+
+  <rect x="60" y="510" width="240" height="55" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+  <rect x="60" y="510" width="240" height="55" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="none"/>
+  <text x="180" y="532" text-anchor="middle" font-size="10" fill="#fbbf24">MySQL（20 张表）</text>
+  <text x="180" y="548" text-anchor="middle" font-size="8" fill="#94a3b8">主 + 从（Slave）读写分离</text>
+
+  <rect x="380" y="510" width="240" height="55" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+  <rect x="380" y="510" width="240" height="55" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="none"/>
+  <text x="500" y="532" text-anchor="middle" font-size="10" fill="#fbbf24">Redis 缓存</text>
+  <text x="500" y="548" text-anchor="middle" font-size="8" fill="#94a3b8">坐席属性热数据</text>
+
+  <rect x="700" y="510" width="240" height="55" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+  <rect x="700" y="510" width="240" height="55" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="none"/>
+  <text x="820" y="532" text-anchor="middle" font-size="10" fill="#fbbf24">MemoryCache</text>
+  <text x="820" y="548" text-anchor="middle" font-size="8" fill="#94a3b8">启动全量加载 · WMB 触发刷新</text>
+
+  <!-- ====== 图例 ====== -->
+  <rect x="30" y="590" width="940" height="28" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+  <rect x="45" y="598" width="10" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="62" y="607" font-size="8" fill="#94a3b8">外部系统</text>
+  <rect x="145" y="598" width="10" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+  <text x="162" y="607" font-size="8" fill="#94a3b8">Layer 数据聚合层</text>
+  <rect x="285" y="598" width="10" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+  <text x="302" y="607" font-size="8" fill="#94a3b8">业务编排层</text>
+  <rect x="400" y="598" width="10" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="417" y="607" font-size="8" fill="#94a3b8">API 层</text>
+  <rect x="490" y="598" width="10" height="10" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1"/>
+  <text x="507" y="607" font-size="8" fill="#94a3b8">数据存储</text>
+</svg>
+</div>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-dot cyan"></div>
+      <h3>核心思想</h3>
+    </div>
+    <ul>
+      <li>• 加一层，统一封装外部系统调用</li>
+      <li>• 调用者不关心数据从哪里来</li>
+      <li>• 数据源变更只改 Layer 层</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-dot emerald"></div>
+      <h3>标准模式</h3>
+    </div>
+    <ul>
+      <li>• @SCFClient 注入外部 RPC 服务</li>
+      <li>• 调用外部系统 → 3 次重试 → 打监控</li>
+      <li>• 返回 null 但不抛异常（容错）</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-dot amber"></div>
+      <h3>注意事项</h3>
+    </div>
+    <ul>
+      <li>• 写操作重试需谨慎（分布式锁）</li>
+      <li>• 外部系统挂时需兜底数据</li>
+      <li>• 缓存刷新依赖消息可靠性</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">数据聚合层（Layer）架构 · 2026 · shenyb</div>
+
+</div>
+</body>
+</html>
