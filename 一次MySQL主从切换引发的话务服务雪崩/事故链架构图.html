@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事故链连锁反应图</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #020617;
+  font-family: 'Noto Sans SC', 'JetBrains Mono', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.container {
+  max-width: 1100px;
+  width: 100%;
+}
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.header h1 {
+  color: #f1f5f9;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.header .subtitle {
+  color: #64748b;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.diagram-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 30px;
+  overflow: hidden;
+}
+svg { width: 100%; height: auto; display: block; }
+.footer {
+  margin-top: 20px;
+  color: #334155;
+  font-size: 11px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔗 事故链：五环连锁反应</h1>
+    <div class="subtitle">2025-08-19 呼叫中心话务服务 · 9 小时故障复盘</div>
+  </div>
+  <div class="diagram-card">
+    <svg viewBox="0 0 1040 780" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+        </pattern>
+        <marker id="arrow-down" viewBox="0 0 10 10" refX="5" refY="10" markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M 0 0 L 5 10 L 10 0" fill="#f87171"/>
+        </marker>
+        <marker id="arrow-fix" viewBox="0 0 10 10" refX="5" refY="10" markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M 0 0 L 5 10 L 10 0" fill="#34d399"/>
+        </marker>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="1040" height="780" fill="url(#grid)"/>
+
+      <!-- Background labels -->
+      <text x="520" y="48" text-anchor="middle" fill="#1e293b" font-size="16" font-family="JetBrains Mono" font-weight="600">CHAIN REACTION</text>
+
+      <!-- ===== Ring 1: MySQL ===== -->
+      <rect x="320" y="70" width="400" height="80" rx="10" fill="rgba(127, 29, 29, 0.35)" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="520" y="105" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="600">① 上游 MySQL 主从切换</text>
+      <text x="520" y="132" text-anchor="middle" fill="#fca5a5" font-size="13">wmedia 转码服务数据库切换 → 接口响应变慢</text>
+
+      <!-- Arrow 1→2 -->
+      <line x1="520" y1="150" x2="520" y2="210" stroke="#f87171" stroke-width="2.5" marker-end="url(#arrow-down)" stroke-dasharray="6,4"/>
+
+      <!-- ===== Ring 2: Thread Pool ===== -->
+      <rect x="220" y="215" width="600" height="90" rx="10" fill="rgba(127, 29, 29, 0.35)" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="520" y="250" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="600">② 共享线程池 → 连锁阻塞</text>
+      <text x="520" y="272" text-anchor="middle" fill="#fda4af" font-size="12">录音上报（调 wmedia 3s 超时）和 ESL 事件共用一个线程池</text>
+      <text x="520" y="290" text-anchor="middle" fill="#fda4af" font-size="12">录音占住线程→ESL 事件排队→两个队列都开始堆积</text>
+
+      <!-- Arrow 2→3 -->
+      <line x1="520" y1="305" x2="520" y2="365" stroke="#f87171" stroke-width="2.5" marker-end="url(#arrow-down)" stroke-dasharray="6,4"/>
+
+      <!-- ===== Ring 3: JVM ===== -->
+      <rect x="220" y="370" width="600" height="90" rx="10" fill="rgba(127, 29, 29, 0.35)" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="520" y="405" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="600">③ 扩容 → 默认 JVM → GC 爆炸</text>
+      <text x="520" y="427" text-anchor="middle" fill="#fda4af" font-size="12">5 节点扩到 10 节点，新节点是默认配置</text>
+      <text x="520" y="445" text-anchor="middle" fill="#fda4af" font-size="12">-Xms2g -Xmx2g -Xmn512m 新生代 512MB 扛不住堆积量</text>
+
+      <!-- Arrow 3→4 -->
+      <line x1="520" y1="460" x2="520" y2="520" stroke="#f87171" stroke-width="2.5" marker-end="url(#arrow-down)" stroke-dasharray="6,4"/>
+
+      <!-- ===== Ring 4: WMB Retry ===== -->
+      <rect x="220" y="525" width="600" height="90" rx="10" fill="rgba(127, 29, 29, 0.35)" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="520" y="560" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="600">④ WMB 10s 超时重试 → 重复消息翻倍</text>
+      <text x="520" y="582" text-anchor="middle" fill="#fda4af" font-size="12">消息处理超 10 秒未 ack → WMB 重投其他节点</text>
+      <text x="520" y="600" text-anchor="middle" fill="#fda4af" font-size="12">GC 导致 ack 延迟 → 一条原始消息变成 3-4 条重复消息</text>
+
+      <!-- Arrow 4→5 -->
+      <line x1="520" y1="615" x2="520" y2="675" stroke="#f87171" stroke-width="2.5" marker-end="url(#arrow-down)" stroke-dasharray="6,4"/>
+
+      <!-- ===== Ring 5: Result ===== -->
+      <rect x="320" y="680" width="400" height="70" rx="12" fill="rgba(185, 28, 28, 0.5)" stroke="#ef4444" stroke-width="2" filter="url(#glow)"/>
+      <text x="520" y="710" text-anchor="middle" fill="#fca5a5" font-size="22" font-weight="700">⚠️ 结果：9 小时故障</text>
+      <text x="520" y="735" text-anchor="middle" fill="#fca5a5" font-size="13">16:00～次日 01:00（录音恢复至凌晨）</text>
+
+      <!-- ===== Fix Measures ===== -->
+      <rect x="60" y="70" width="180" height="680" rx="10" fill="rgba(6, 78, 59, 0.2)" stroke="#34d399" stroke-width="1" stroke-dasharray="6,3"/>
+      <text x="150" y="100" text-anchor="middle" fill="#34d399" font-size="14" font-weight="600">✅ 改进措施</text>
+      <line x1="100" y1="112" x2="200" y2="112" stroke="#34d399" stroke-width="0.8" opacity="0.5"/>
+      <text x="150" y="140" text-anchor="middle" fill="#6ee7b7" font-size="11">① 去掉 WMB 超时重试</text>
+      <text x="150" y="165" text-anchor="middle" fill="#6ee7b7" font-size="11">② 调低外部超时</text>
+      <text x="150" y="190" text-anchor="middle" fill="#6ee7b7" font-size="11">③ 加大 JVM 参数</text>
+      <text x="150" y="215" text-anchor="middle" fill="#6ee7b7" font-size="11">④ 客户端消费限速</text>
+      <text x="150" y="240" text-anchor="middle" fill="#6ee7b7" font-size="11">⑤ 坐席属性服务同步改</text>
+      <text x="150" y="280" text-anchor="middle" fill="#34d399" font-size="11">核心原则：</text>
+      <text x="150" y="305" text-anchor="middle" fill="#6ee7b7" font-size="10">隔离 ≠ 共享</text>
+      <text x="150" y="330" text-anchor="middle" fill="#6ee7b7" font-size="10">降级 ≠ 重试</text>
+
+      <!-- ===== Legend ===== -->
+      <text x="820" y="700" text-anchor="start" fill="#475569" font-size="10" font-family="JetBrains Mono">INCIDENT CHAIN</text>
+      <rect x="800" y="708" width="12" height="12" rx="2" fill="rgba(127, 29, 29, 0.35)" stroke="#ef4444" stroke-width="1"/>
+      <text x="818" y="718" fill="#64748b" font-size="11">事故链环节</text>
+      <rect x="920" y="708" width="12" height="12" rx="2" fill="rgba(6, 78, 59, 0.2)" stroke="#34d399" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="938" y="718" fill="#64748b" font-size="11">改进措施</text>
+      <rect x="800" y="728" width="12" height="12" rx="2" fill="rgba(185, 28, 28, 0.5)" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="818" y="738" fill="#64748b" font-size="11">最终结果</text>
+    </svg>
+  </div>
+  <div class="footer">话务服务事故复盘 · 2025-08-19</div>
+</div>
+</body>
+</html>
