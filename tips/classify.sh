@@ -23,7 +23,7 @@ classify() {
     content="$(cat "$file")"
 
     # 关键字 → 目录映射 (按优先级从高到低)
-    if echo "$content" | grep -qi "docker\|kubesphere\|k8s\|kubernetes\|helm\|istio\|滚动升级\|蓝绿\|SLB\|OPS"; then
+    if echo "$content" | grep -qi "docker\|kubesphere\|k8s\|kubernetes\|helm\|istio\|cgroup\|kernel\|linux\|buffer io\|滚动升级\|蓝绿\|SLB\|OPS\|限速"; then
         dest="devops"
     elif echo "$content" | grep -qi "Redis\|MySQL\|postgres\|sql\|数据源\|分表\|shard\|事务\|索引\|连接池"; then
         dest="db"
