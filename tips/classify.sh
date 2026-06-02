@@ -13,9 +13,10 @@ classify() {
     basename="$(basename "$file")"
 
     # 跳过已在子目录中的文件
-    local relpath
-    relpath="$(realpath --relative-to="$TIP_DIR" "$file" 2>/dev/null || echo "$file")"
-    if [[ "$relpath" == */*/* ]]; then
+    # 检查是否已在子目录中 (macOS 兼容: 用 bash 参数展开替代 realpath)
+    local dirpart
+    dirpart="$(cd "$TIP_DIR" && realpath "$(dirname "$file")" 2>/dev/null || echo "$(dirname "$file")")"
+    if [[ "$dirpart" != "$TIP_DIR" ]]; then
         return
     fi
 
